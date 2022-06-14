@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -x
 
-# Then exec the container's main process (what's set as CMD in the Dockerfile).
-exec "$@"
+RAILS_ENV=production rake assets:precompile
+exec rails s -e production -b 0.0.0.0

@@ -9,7 +9,14 @@ RUN gem install bundler
 RUN bundle install
 COPY . .
 
-RUN rake assets:precompile
+RUN chmod +x entrypoint.sh
+
+# helpful when trying to update gems -> bundle update, remove the Gemfile.lock, start ruby
+# RUN bundle update
+# RUN rm -vf /usr/src/app/Gemfile.lock
+
+HEALTHCHECK --interval=10s --timeout=3s \
+  CMD curl -f -s http://localhost:3000 || exit 1
 
 EXPOSE 3000
-CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+ENTRYPOINT ["bash","entrypoint.sh"]
