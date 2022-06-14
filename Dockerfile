@@ -1,22 +1,20 @@
 FROM ruby:2.7.5
 
-RUN apt-get update && apt-get install -y nodejs yarn postgresql-client
+RUN apt-get update -qq && apt-get install -qqy build-essential nodejs
 
 RUN mkdir /app
 WORKDIR /app
-COPY Gemfile Gemfile.lock ./
-RUN gem install bundler
+
+COPY Gemfile Gemfile.lock /app/
 RUN bundle install
-COPY . .
 
-RUN chmod +x entrypoint.sh
+ENV RAILS_ENV development
+ENV RACK_ENV development
 
-# helpful when trying to update gems -> bundle update, remove the Gemfile.lock, start ruby
-# RUN bundle update
-# RUN rm -vf /usr/src/app/Gemfile.lock
+COPY . /app
 
-HEALTHCHECK --interval=10s --timeout=3s \
-  CMD curl -f -s http://localhost:3000 || exit 1
+RUN bundle exec rake assets:precompile
 
 EXPOSE 3000
-ENTRYPOINT ["bash","entrypoint.sh"]
+
+CMD bundle exec rails server
